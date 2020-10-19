@@ -32,32 +32,20 @@ client.connect(err => {
         const title = req.body.title;
         const description = req.body.description;
         console.log(file, title, description);
-        
-        const filePath =`${__dirname}/service/${file.name}`;
 
-        file.mv(filePath, err => {
-            if (err) {
-                console.log(err);
-                return res.status(500).send({ msg: 'failed' })
-            }
-            const newImg = fs.readFileSync(filePath);
-            const encImg =newImg.toString('base64');
+        const newImg = file.data;
+        const encImg = newImg.toString('base64');
 
-            const image = {
-                contentType: req.files.file.mimetype,
-                size: req.files.file.size,
-                img: Buffer(encImg, 'base64')
-            };
+        const image = {
+            contentType: file.mimetype,
+            size: file.size,
+            img: Buffer.from(encImg, 'base64')
+        };
 
-            serviceCollection.insertOne({ title, description, image })
-                .then(result => {
-                    fs.remove(filePath,error=>{
-                        if(error){console.log(error)}
-                        res.send(result.insertedCount > 0)
-                    })
-                })
-        })
-        // return res.send({ name: file.name, path: `/${file.name}` })
+        serviceCollection.insertOne({ title, description, image })
+            .then(result => {
+                res.send(result.insertedCount > 0)
+            })
     })
 
     //get service from admin
@@ -111,27 +99,27 @@ client.connect(err => {
         const price = req.body.price;
         const status = req.body.status;
 
-            const newImg = file.data;
-            const encImg = newImg.toString('base64');
+        const newImg = file.data;
+        const encImg = newImg.toString('base64');
 
-            const image= {
-                contentType: file.mimetype,
-                size: file.size,
-                img: Buffer.from(encImg, 'base64')
-            };
-            orderCollection.insertOne({name, email, project, projectDetails, price, status, image})
+        const image = {
+            contentType: file.mimetype,
+            size: file.size,
+            img: Buffer.from(encImg, 'base64')
+        };
+        orderCollection.insertOne({ name, email, project, projectDetails, price, status, image })
             .then(result => {
-                    res.send(result.insertedCount > 0);
+                res.send(result.insertedCount > 0);
             })
-        
+
     })
     // show Order to customer
     app.get('/showOrder', (req, res) => {
-        orderCollection.find({email:req.query.email})
+        orderCollection.find({ email: req.query.email })
             .toArray((err, documents) => {
                 res.send(documents);
             })
-        })
+    })
 
     // Show all Service list to admin 
     app.get('/adminShowServices', (req, res) => {
@@ -139,7 +127,7 @@ client.connect(err => {
             .toArray((err, documents) => {
                 res.send(documents);
             })
-        })
+    })
 });
 
 
